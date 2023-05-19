@@ -1,23 +1,34 @@
 import { Controller } from "./entity/components/controller.js";
+import { Enemy } from "./entity/enemy.js";
 import { Player } from "./entity/player.js";
 
-Player.addComponent(Controller);
-document.body.append(Player.htmlElement);
+const entities = [Player, new Enemy(600, 500)];
+
+const playerController = Controller.getComponentData(Player, "controller");
 
 addEventListener("keydown", function(event) {
-    if (event.key === 'ArrowLeft')
-        Controller.setMovingState(Player, "left", true);
-    else if (event.key === 'ArrowRight')
-        Controller.setMovingState(Player, "right", true);
-    else if (event.key === 'ArrowUp')
-        Controller.setMovingState(Player, "up", true);
-    else if (event.key === 'ArrowDown')
-        Controller.setMovingState(Player, "down", true);
+    playerController.moving[event.key] = true;
 });
 
-function mainLoop() {
-    Player.update();
+addEventListener("keyup", function(event) {
+    playerController.moving[event.key] = false;
+});
+
+let lastTime;
+
+function mainLoop(time) {
+    if (lastTime != undefined) {
+        const delta = time - lastTime
+        
+        for (const entity of entities)
+            entity.update(delta);
+    } else {
+        for (const entity of entities)
+            document.body.append(entity);
+    }
+
+    lastTime = time;
     requestAnimationFrame(mainLoop);
 }
 
-mainLoop();
+requestAnimationFrame(mainLoop);

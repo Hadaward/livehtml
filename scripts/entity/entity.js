@@ -1,38 +1,53 @@
 import { Vec2D } from "../math/vec2d.js";
+import { assert, assertType, extendHTMLElement } from "../utils.js";
+import { BaseEntityComponent } from "./components/base.js";
 
-export class Entity {
-    constructor() {
-        this.htmlElement = document.createElement("div");
-        this.htmlElement.style.position = "absolute";
+export const Entity = extendHTMLElement(class {
+    constructor(element) {
+        element.style.position = "absolute";
 
         this.position = new Vec2D();
         this.components = [];
     }
 
     set id(id) {
-        this.htmlElement.className = id;
+        assertType(id, "string", "id");
+        this.className = id;
     }
 
     get id() {
-        return this.htmlElement.className;
+        return this.className;
     }
 
-    update() {
+    get size() {
+        const style = getComputedStyle(this['#element']);
+
+        return new Vec2D(
+            Number(style.width.match(/\d+/)[0]),
+            Number(style.height.match(/\d+/)[0]),
+        )
+    }
+
+    update(delta) {
         for (const component of this.components) {
-            component.update(this);
+            component.update(this, delta);
         }
 
-        this.htmlElement.style.left = `${this.position.x}px`;
-        this.htmlElement.style.top = `${this.position.y}px`;
+        this.style.left = `${this.position.x}px`;
+        this.style.top = `${this.position.y}px`;
     }
 
-    addComponent(component, extraData) {
-        component.createEntityData(this, extraData);
+    addComponent(component, data) {
+        assert(Object.getPrototypeOf(component) === BaseEntityComponent, 'Expected component to extend BaseEntityComponent', TypeError);
+
+        component.addedTo(this, data);
         this.components.push(component);
     }
 
     removeComponent(component) {
-        component.deleteEntityData(this);
+        assert(Object.getPrototypeOf(component) === BaseEntityComponent, 'Expected component to extend BaseEntityComponent', TypeError);
+
+        component.removedFrom(this);
         this.components.splice(this.components.indexOf(component), 1);
     }
-}
+}, "div");
