@@ -20,8 +20,12 @@ function mainLoop(time) {
     if (lastTime != undefined) {
         const delta = time - lastTime
         
-        for (const entity of entities)
-            entity.update(delta);
+        for (const entity of entities) {
+            if (entity.parent === null)
+                entities.splice(entities.indexOf(entity), 1);
+            else
+                entity.update(delta);
+        }
     } else {
         for (const entity of entities)
             document.body.append(entity);

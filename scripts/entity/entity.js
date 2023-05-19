@@ -19,7 +19,12 @@ export const Entity = extendHTMLElement(class {
         return this.className;
     }
 
+    get parent() {
+        return this.parentElement;
+    }
+
     get size() {
+        assert(this.parent !== null, 'Trying to get the size of an entity that is no longer in the world.', ReferenceError);
         const style = getComputedStyle(this['#element']);
 
         return new Vec2D(
