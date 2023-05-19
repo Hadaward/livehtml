@@ -1,0 +1,10 @@
+div.player {
+    position: absolute;
+    
+    left: 0;
+    top: 0;
+
+    width: 3em;
+    height: 3em;
+    background-color: #333;
+}
