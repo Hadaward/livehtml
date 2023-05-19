@@ -70,7 +70,8 @@ export class Health extends BaseEntityComponent {
 
     static #changeControllerMovementAbility(entity, healthData) {
         if (Controller.hasComponentData(entity, "controller")) {
-            Controller.changeMovementAbility(entity, !healthData.isDead, !healthData.isDead);
+            const isAlive = !healthData.isDead;
+            Controller.changeMovementAbility(entity, { left: isAlive, right: isAlive, up: isAlive, down: isAlive });
         }
     }
 

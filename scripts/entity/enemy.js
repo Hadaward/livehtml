@@ -29,7 +29,6 @@ export class Enemy extends Entity {
         }
 
         this.controller = Controller.getComponentData(this, "controller");
-        Controller.changeMovementAbility(this, false, false);
     }
 
     update(delta) {

@@ -21,10 +21,7 @@ export class Controller extends BaseEntityComponent {
             impulse: 0.25,
             acceleration: new Vec2D(),
             velocity: new Vec2D(),
-            canMove: {
-                horizontally: true,
-                vertically: true
-            }
+            canMove: { left: true, right: true, up: true, down: true }
         }, data));
     }
 
@@ -38,11 +35,21 @@ export class Controller extends BaseEntityComponent {
 
         const controllerData = this.getComponentData(entity, "controller");
 
-        if (controllerData.canMove.horizontally)
-            this.#calculateHorizontalVelocity(controllerData);
-        
-        if (controllerData.canMove.vertically)
-            this.#calculateVerticalVelocity(controllerData);
+        if (controllerData.moving.ArrowLeft) {
+            controllerData.moving.ArrowLeft = controllerData.canMove.left;
+        }
+        if (controllerData.moving.ArrowRight) {
+            controllerData.moving.ArrowRight = controllerData.canMove.right;
+        }
+        if (controllerData.moving.ArrowDown) {
+            controllerData.moving.ArrowDown = controllerData.canMove.down;
+        }
+        if (controllerData.moving.ArrowUp) {
+            controllerData.moving.ArrowUp = controllerData.canMove.up;
+        }
+
+        this.#calculateHorizontalVelocity(controllerData);
+        this.#calculateVerticalVelocity(controllerData);
 
         entity.position.x += (delta / FPS_INTERVAL) * controllerData.velocity.x;
         entity.position.y += (delta / FPS_INTERVAL) * controllerData.velocity.y;
@@ -69,9 +76,16 @@ export class Controller extends BaseEntityComponent {
 
     }
 
-    static changeMovementAbility(entity, horizontally = true, vertically = true) {
-        this.getComponentData(entity, "controller").canMove.horizontally = horizontally;
-        this.getComponentData(entity, "controller").canMove.vertically = vertically;
+    static changeMovementAbility(entity, sides = { left: true, right: true, up: true, down: true }) {
+        const controllerData = this.getComponentData(entity, "controller");
+        controllerData.canMove = Object.assign(controllerData.canMove, sides);
+        console.log('changing', controllerData.canMove)
+    }
+
+    static isAbleToMove(entity) {
+        const controllerData = this.getComponentData(entity, "controller");
+        return controllerData.canMove.left || controllerData.canMove.right
+               || controllerData.canMove.up || controllerData.canMove.down;
     }
 
     static #calculateHorizontalVelocity(controllerData) {
