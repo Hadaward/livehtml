@@ -1,10 +1,10 @@
 import { isPointInsideRect } from "../math/collisions.js";
 import { circleRadiusFromSize } from "../math/utils.js";
 import { Vec2D } from "../math/vec2d.js";
+import { Collider } from "./components/collider.js";
 import { Controller } from "./components/controller.js";
 import { Health } from "./components/health.js";
 import { Entity } from "./entity.js";
-import { Player } from "./player.js";
 
 export class Enemy extends Entity {
     constructor(x, y) {
@@ -17,6 +17,7 @@ export class Enemy extends Entity {
 
         this.addComponent(Controller, { impulse: 0.15, maxSpeed: 3 });
         this.addComponent(Health);
+        this.addComponent(Collider);
 
         this.movingAlgorithm = {
             nextPositionTimestamp: 0,
@@ -28,6 +29,7 @@ export class Enemy extends Entity {
         }
 
         this.controller = Controller.getComponentData(this, "controller");
+        Controller.changeMovementAbility(this, false, false);
     }
 
     update(delta) {

@@ -47,23 +47,37 @@ export class Health extends BaseEntityComponent {
 
         const healthData = this.getComponentData(entity, "health");
 
-        this.#checkInitialData(healthData);
+        this.#checkInitialData(entity, healthData);
         this.#regenerationTick(entity, healthData);
-
-        if (Controller.hasComponentData(entity, "controller")) {
-            Controller.changeMovementAbility(entity, !healthData.isDead, !healthData.isDead);
-        }
     }
 
     static updateHealth(entity, amount) {
         const healthData = this.getComponentData(entity, "health");
         healthData.health = Math.max(0, Math.min(healthData.health + amount, healthData.baseHealth));
         this.#updateBar(healthData);
+        this.#checkDeadState(healthData);
     }
 
-    static #checkInitialData(healthData) {
+    static #checkDeadState(entity, healthData) {
+        if (healthData.isDead && healthData.health > 0) {
+            healthData.isDead = false;
+            this.#changeControllerMovementAbility(entity, healthData);
+        } else if (!healthData.isDead && healthData.health <= 0) {
+            healthData.isDead = true;
+            this.#changeControllerMovementAbility(entity, healthData);
+        }
+    }
+
+    static #changeControllerMovementAbility(entity, healthData) {
+        if (Controller.hasComponentData(entity, "controller")) {
+            Controller.changeMovementAbility(entity, !healthData.isDead, !healthData.isDead);
+        }
+    }
+
+    static #checkInitialData(entity, healthData) {
         if (healthData.health === -1) {
             healthData.health = healthData.baseHealth;
+            this.#checkDeadState(entity, healthData);
         }
 
         if (healthData.bar.maxWidth === -1) {
@@ -86,6 +100,5 @@ export class Health extends BaseEntityComponent {
     static #updateBar(healthData) {
         healthData.bar.width = Math.abs(healthData.health * healthData.bar.maxWidth / healthData.baseHealth);
         healthData.bar.element.style.width = `${healthData.bar.width}px`;
-        healthData.isDead = healthData.health === 0;
     }
 }
