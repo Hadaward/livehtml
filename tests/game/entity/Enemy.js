@@ -24,8 +24,8 @@ export class Enemy extends BaseEntity {
             }
         }
 
-        this.size.x = 20;
-        this.size.y = 30;
+        this.size.x = 50;
+        this.size.y = 55;
 
         this.move = {
             radius: 32,
