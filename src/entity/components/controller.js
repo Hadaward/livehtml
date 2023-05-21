@@ -4,10 +4,12 @@ import { Vec2D } from "../../utils/math/vec2d.js";
 import { BaseEntity } from "../base.js";
 import { BaseEntityComponent } from "./base.js";
 import { getCollisionBetweenPointAndRect } from "../../utils/math/collisions.js";
+import { AnimatedSprite } from "./animatedsprite.js";
 
 export class Controller extends BaseEntityComponent {
-    static connected(entity, data) {
+    static connected(entity, data = {}) {
         super.connected(entity);
+        assertType(data, "object", "data");
 
         this.registerEntityComponentData(entity, Controller, Object.assign(lock({
             movingDirections: lock({
@@ -33,16 +35,23 @@ export class Controller extends BaseEntityComponent {
         }), data));
     }
 
+    static disconnected(entity) {
+        super.disconnected(entity);
+        this.removeEntityComponentData(entity, Controller);
+    }
+
     static update(entity, delta) {
         super.update(entity, delta);
 
         const controllerData = this.getEntityComponentData(entity, Controller);
 
         if (controllerData.canMove) {
-            if (controllerData.velocity.x < 0)
-                entity.style.transform = "scaleX(-1)";
-            else if (controllerData.velocity.x > 0)
-                entity.style.transform = "scaleX(1)";
+            if (this.hasEntityComponentData(entity, AnimatedSprite) && (controllerData.movingDirections.left || controllerData.movingDirections.right)) {
+                if (controllerData.velocity.x < 0)
+                    AnimatedSprite.flip(entity, true);
+                else if (controllerData.velocity.x > 0)
+                    AnimatedSprite.flip(entity, false);
+            }
 
             if (controllerData.movingToPoint.enabled) {
                 this.resetMovingDirections(entity);
@@ -70,6 +79,8 @@ export class Controller extends BaseEntityComponent {
 
             entity.position.x += (delta / FPS_INTERVAL) * controllerData.velocity.x;
             entity.position.y += (delta / FPS_INTERVAL) * controllerData.velocity.y;
+        } else {
+            controllerData.velocity.x = controllerData.velocity.y = controllerData.acceleration.x = controllerData.acceleration.y = 0;
         }
 
         if (entity.position.x <= 0)
@@ -85,6 +96,15 @@ export class Controller extends BaseEntityComponent {
 
     static resetMovingDirections(entity) {
         this.setMovingDirections(entity);
+    }
+
+    static isEntityMoving(entity) {
+        assertType(entity, "object", "entity");
+        assert(entity instanceof BaseEntity, `Expected entity to be instance of BaseEntity.`, TypeError);
+
+        const controllerData = this.getEntityComponentData(entity, Controller);
+
+        return controllerData.velocity.x !== 0 || controllerData.velocity.y !== 0;
     }
 
     static setMovingDirection(entity, directionName, value) {
@@ -163,6 +183,8 @@ export class Controller extends BaseEntityComponent {
             controllerData.movingToPoint.enabled = false;
             controllerData.movingToPoint.position.x =
             controllerData.movingToPoint.position.y = 0;
+            controllerData.acceleration.x = 0;
+            controllerData.acceleration.y = 0;
             this.resetMovingDirections(entity);
         }
     }

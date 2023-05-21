@@ -10,47 +10,45 @@ body {
     background-color: #0f0f0f;
 }
 
-.player {
-    background-color: aqua;
-    width: 20em;
-
-    animation: 1s infinite player;
+div.player {
+    z-index: 0;
 }
 
-@keyframes player {
-    0% {
-        background: url('assets/animations/player/player_1.png') no-repeat;
-    }
+div.enemy {
+    z-index: 0;
+}
 
-    10% {
-        background: url('assets/animations/player/player_1.png') no-repeat;
-    }
+div.enemy .sprite {
+    scale: 2;
 
-    30% {
-        background: url('assets/animations/player/player_2.png') no-repeat;
-    }
+    left: -0.5em;
+}
 
-    40% {
-        background: url('assets/animations/player/player_3.png') no-repeat;
-    }
+/** Health Bar **/
+div.health::before {
+    position: absolute;
+    
+    z-index: -1;
 
-    50% {
-        background: url('assets/animations/player/player_4.png') no-repeat;
-    }
+    width: 3em;
+    height: 0.75em;
 
-    70% {
-        background: url('assets/animations/player/player_5.png') no-repeat;
-    }
+    border-radius: 4.3px;
+    
+    content: '';
+    background: #4e1212;
+}
 
-    80% {
-        background: url('assets/animations/player/player_6.png') no-repeat;
-    }
+div.health {
+    position: relative;
+    top: -1.2em;
+    left: 0em;
 
-    90% {
-        background: url('assets/animations/player/player_7.png') no-repeat;
-    }
+    width: 3em;
+    height: 0.75em;
 
-    100% {
-        background: url('assets/animations/player/player_8.png') no-repeat;
-    }
+    opacity: 1.00;
+    border-radius: 4.3px;
+    
+    background-color: #cf2626;
 }
